@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MXA - Главный сервер Minecraft</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        header {
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid #9b59b6;
+            box-shadow: 0 4px 20px rgba(155, 89, 182, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: 900;
+            background: linear-gradient(45deg, #9b59b6, #e74c3c, #f39c12);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        .server-ip {
+            background: rgba(155, 89, 182, 0.2);
+            border: 2px solid #9b59b6;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #9b59b6;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(155, 89, 182, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(155, 89, 182, 0.6); }
+        }
+
+        .server-ip:hover {
+            background: rgba(155, 89, 182, 0.4);
+            transform: scale(1.05);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(155, 89, 182, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.3em;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(45deg, #9b59b6, #e74c3c);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(155, 89, 182, 0.5);
+        }
+
+        section {
+            padding: 60px 0;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 50px;
+            color: #9b59b6;
+        }
+
+        h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #9b59b6, #e74c3c);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .mode-card {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(155, 89, 182, 0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #9b59b6, #e74c3c);
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px);
+            border-color: #9b59b6;
+            box-shadow: 0 15px 40px rgba(155, 89, 182, 0.3);
+        }
+
+        .mode-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .mode-card h3 {
+            color: #9b59b6;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .mode-card p {
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
+
+        .mode-features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .mode-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(155, 89, 182, 0.1);
+            color: #c0c0c0;
+        }
+
+        .mode-features li::before {
+            content: '✦ ';
+            color: #9b59b6;
+        }
+
+        .donate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .donate-card {
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 2px solid rgba(155, 89, 182, 0.3);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .donate-card:hover {
+            border-color: #f39c12;
+            box-shadow: 0 15px 40px rgba(243, 156, 18, 0.3);
+            transform: translateY(-10px);
+        }
+
+        .donate-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .donate-title.vip { color: #2ecc71; }
+        .donate-title.premium { color: #f39c12; }
+        .donate-title.legendary { color: #e74c3c; }
+        .donate-title.titan {
+            background: linear-gradient(45deg, #9b59b6, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .donate-price {
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #fff;
+            margin: 20px 0;
+        }
+
+        .donate-price span {
+            font-size: 0.5em;
+            color: #999;
+        }
+
+        .donate-perks {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .donate-perks li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #c0c0c0;
+        }
+
+        .donate-perks li::before {
+            content: '✓ ';
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .btn-buy {
+            display: inline-block;
+            padding: 15px 50px;
+            background: transparent;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1em;
+            border: 2px solid #9b59b6;
+            transition: all 0.3s;
+        }
+
+        .btn-buy:hover {
+            background: #9b59b6;
+            transform: scale(1.05);
+        }
+
+        .commands-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(30, 30, 50, 0.8);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .commands-table th {
+            background: rgba(155, 89, 182, 0.3);
+            padding: 15px;
+            text-align: left;
+            color: #fff;
+        }
+
+        .commands-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(10, 10, 20, 0.95);
+            border-top: 2px solid #9b59b6;
+            margin-top: 60px;
+        }
+
+        footer p {
+            color: #777;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero h1 { font-size: 2em; }
+            h2 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">MXA</div>
+                <div class="server-ip" onclick="copyIP()">📋 play.mxa-mc.ru</div>
+                <nav>
+                    <a href="#modes" class="btn">Режимы</a>
+                    <a href="#donate" class="btn">Донат</a>
+                    <a href="#commands" class="btn">Команды</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Добро пожаловать на MXA</h1>
+        <p>Уникальный Minecraft сервер с захватывающими режимами, эпическими битвами и щедрыми донат-привилегиями</p>
+        <a href="#donate" class="btn">🔥 Стать легендой</a>
+        <br><br>
+        <div class="server-ip" onclick="copyIP()">📋 play.mxa-mc.ru</div>
+    </section>
+
+    <section id="modes">
+        <div class="container">
+            <h2>🎮 Игровые режимы</h2>
+            <div class="modes-grid">
+                <div class="mode-card">
+                    <div class="mode-icon">⚔️</div>
+                    <h3>Гриф-режим</h3>
+                    <p>Классический режим выживания с элементами гриферства. Строй базы, создавай кланы, взрывай врагов!</p>
+                    <ul class="mode-features">
+                        <li>Разрушаемый мир без защиты</li>
+                        <li>Клановые войны и осады</li>
+                        <li>Редкие артефакты и сокровища</li>
+                        <li>Топ-кланы получают бустеры</li>
+                    </ul>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🏗️</div>
+                    <h3>Выживание с экономикой</h3>
+                    <p>Классический survival с продуманной экономикой, работой, аукционами и магазинами.</p>
+                    <ul class="mode-features">
+                        <li>Своя валюта — монеты MXA</li>
+                        <li>Рынок и аукцион между игроками</li>
+                        <li>Прокачка навыков</li>
+                        <li>Ежедневные квесты</li>
+                    </ul>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🎯</div>
+                    <h3>Bed Wars</h3>
+                    <p>Защити свою кровать и уничтожь кровати врагов! Тактика и командная работа.</p>
+                    <ul class="mode-features">
+                        <li>Команды до 4 игроков</li>
+                        <li>Улучшаемые генераторы</li>
+                        <li>Уникальные карты</li>
+                        <li>Турниры каждый месяц</li>
+                    </ul>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🧟</div>
+                    <h3>Зомби-осада</h3>
+                    <p>Выживи против бесконечных волн зомби и мутантов!</p>
+                    <ul class="mode-features">
+                        <li>Волны каждые 5 минут</li>
+                        <li>Боссы с уникальными способностями</li>
+                        <li>Прокачка оружия</li>
+                        <li>Игра до 8 человек</li>
+                    </ul>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🏝️</div>
+                    <h3>SkyBlock</h3>
+                    <p>Начни с острова и преврати его в империю!</p>
+                    <ul class="mode-features">
+                        <li>Уникальные острова</li>
+                        <li>Авто-фермы</li>
+                        <li>Система контрактов</li>
+                        <li>PvP-арена</li>
+                    </ul>
+                </div>
+                <div class="mode-card">
+                    <div class="mode-icon">🏆</div>
+                    <h3>Дуэли 1v1</h3>
+                    <p>Сразись с лучшими бойцами сервера!</p>
+                    <ul class="mode-features">
+                        <li>Рейтинг ELO</li>
+                        <li>Киты брони на выбор</li>
+                        <li>Арены с ловушками</li>
+                        <li>Призы: донат-валюта</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="donate" style="background: rgba(10,10,20,0.5);">
+        <div class="container">
+            <h2>💎 Донат-привилегии</h2>
+            <p style="text-align:center;color:#999;margin-bottom:40px;">Поддержи сервер и получи крутые возможности!</p>
+            <div class="donate-grid">
+                <div class="donate-card">
+                    <div class="donate-title vip">⭐ VIP</div>
+                    <div class="donate-price">199 <span>RUB</span></div>
+                    <ul class="donate-perks">
+                        <li>Префикс [VIP] в чате</li>
+                        <li>Цветной ник (зелёный)</li>
+                        <li>Команда /fly</li>
+                        <li>Набор "Новичок"</li>
+                        <li>VIP-чат</li>
+                    </ul>
+                    <a href="https://vk.com/mxa_mc" class="btn-buy">Купить VIP</a>
+                </div>
+                <div class="donate-card">
+                    <div class="donate-title premium">💫 Премиум</div>
+                    <div class="donate-price">499 <span>RUB</span></div>
+                    <ul class="donate-perks">
+                        <li>Всё из VIP</li>
+                        <li>Префикс [Premium]</li>
+                        <li>/heal и /feed</li>
+                        <li>Приват 50 блоков</li>
+                        <li>Кит "/kit premium"</li>
+                    </ul>
+                    <a href="https://vk.com/mxa_mc" class="btn-buy">Купить Премиум</a>
+                </div>
+                <div class="donate-card">
+                    <div class="donate-title legendary">👑 Легенда</div>
+                    <div class="donate-price">999 <span>RUB</span></div>
+                    <ul class="donate-perks">
+                        <li>Всё из Премиум</li>
+                        <li>Префикс [Легенда]</li>
+                        <li>/god и /repair</li>
+                        <li>Приват 100 блоков</li>
+                        <li>Приоритетный вход</li>
+                    </ul>
+                    <a href="https://vk.com/mxa_mc" class="btn-buy">Купить Легенду</a>
+                </div>
+                <div class="donate-card">
+                    <div class="donate-title titan">🌀 Титан</div>
+                    <div class="donate-price">2499 <span>RUB</span></div>
+                    <ul class="donate-perks">
+                        <li>Всё из Легенды</li>
+                        <li>Префикс [Титан]</li>
+                        <li>/fly speed 5</li>
+                        <li>Свой сундук-магазин</li>
+                        <li>Секретный подарок</li>
+                    </ul>
+                    <a href="https://vk.com/mxa_mc" class="btn-buy">Купить Титана</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="commands">
+        <div class="container">
+            <h2>📋 Команды сервера</h2>
+            <table class="commands-table">
+                <thead><tr><th>Команда</th><th>Описание</th><th>Доступ</th></tr></thead>
+                <tbody>
+                    <tr><td>/spawn</td><td>На спавн</td><td>Все</td></tr>
+                    <tr><td>/fly</td><td>Полёт</td><td>VIP+</td></tr>
+                    <tr><td>/heal</td><td>Лечение</td><td>Премиум+</td></tr>
+                    <tr><td>/god</td><td>Бессмертие</td><td>Легенда+</td></tr>
+                    <tr><td>/sethome</td><td>Точка дома</td><td>Все</td></tr>
+                    <tr><td>/tpa</td><td>Телепорт к игроку</td><td>Все</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>IP: <strong>play.mxa-mc.ru</strong> | Версия: 1.16.5 - 1.20.4</p>
+            <p>По вопросам: <a href="https://vk.com/mxa_mc" style="color:#9b59b6;">vk.com/mxa_mc</a></p>
+            <br>
+            <p>© 2024 Сервер MXA. Все права защищены.</p>
+            <p style="color:#9b59b6;font-weight:bold;margin-top:15px;">Создано Никитосом ✨</p>
+        </div>
+    </footer>
+
+    <script>
+        function copyIP() {
+            navigator.clipboard.writeText('play.mxa-mc.ru');
+            alert('IP скопирован: play.mxa-mc.ru');
+        }
+    </script>
+</body>
+  </html>
